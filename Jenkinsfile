@@ -18,5 +18,9 @@ pipeline{
                 sh 'mvn verify -DskipUnitTests'
             }
         }
+        stage('maven building of java application into  a jar artifact'){
+            sh 'mvn clean install'
+        }
+        
     }
 }
