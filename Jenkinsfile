@@ -19,7 +19,10 @@ pipeline{
             }
         }
         stage('maven building of java application into  a jar artifact'){
-            sh 'mvn clean install'
+            steps{
+                sh 'mvn clean install'
+            }
+            
         }
         
     }
