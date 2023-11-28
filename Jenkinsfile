@@ -80,6 +80,20 @@ pipeline{
                 }
             }
         }
+        stage('Pushing docker image'){
+            steps{
+                script{
+                    withCredentials([string(credentialsId: 'docker-cred', variable: 'dockerHub-cred')]) {
+
+                        sh 'docker login -u mrace17 -p ${dockerHub-cred}'
+                        sh 'docker image push mrace17/$JOB_NAME:v1.$BUILD_ID'
+                        sh 'docker image push mrace17/$JOB_NAME:v1.latest'
+                    }
+                }
+                    
+            }
+        }
+        
 
 
     }
