@@ -1,7 +1,15 @@
 pipeline{
 
     agent any
-
+    parameters{
+        choice(name: 'action', choices: 'create\ndestroy\ndestroyekscluster', description: 'Create/update or destroy the eks cluster')
+        string (name: 'cluster', defaultValue: 'demo-cluster', description: 'Eks cluster name')
+        string (name: 'region', defaultValue: 'us-east-1a', description: 'Eks cluster region')
+    }  
+    environment{
+        ACCESS_KEY = Credentials('aws_access_key_id')
+        SECRET_KEY = Credentials('aws_secret_access_key_id')
+    }
     stages{
 
 
@@ -93,8 +101,107 @@ pipeline{
                     
             }
         }
+
+
+
+
+// ================================CD PART======================================
         
 
+
+        stage('eks connect'){
+            steps{
+                sh """
+
+                    aws configure set aws_access_key_id "$ACCESS_KEY"
+                    aws configure set aws_secret_access_key_id "$SECRET_KEY"
+                    aws configure set region ""
+
+                    aws eks --region ${params.region} update-kubeconfig --name ${params.cluster}
+
+                """
+            }
+        }
+
+        stage('eks deployment'){
+
+            when { expression {params.action == "create"}}
+
+            steps {
+
+                def apply = false 
+                try{
+                    input: message:'please  confirm the apply to initiate the deployments', ok: 'Ready to apply the config'
+          
+                    apply = true
+                }
+                catch(err){
+                    apply = false 
+                    CurrentBuild.result = 'UNSTABLE'
+                }
+                if(apply){
+
+                    sh """
+
+                        kubectl apply -f .
+
+                    """
+                }
+            }
+        }
+        stage('eks deployment delete'){
+
+            when { expression {params.action == "destroy"}}
+
+            steps {
+
+                def destroy = false 
+                try{
+                    input: message:'please  confirm the apply to delete the deployments', ok: 'Ready to destroy the config'
+          
+                    destroy = true
+                }
+                catch(err){
+                    destroy = false 
+                    CurrentBuild.result = 'UNSTABLE'
+                }
+                if(destroy){
+
+                    sh """
+
+                        kubectl delete -f .
+
+                    """
+                }
+            }
+        }
+        stage('eks cluster destroy'){
+
+            when { expression {params.action == "destroyekscluster"}}
+
+            steps {
+
+                def destroyeks = false 
+                try{
+                    input: message:'please  confirm the apply to delete the eks cluster', ok: 'Ready to destroy the infra'
+          
+                    destroyeks = true
+                }
+                catch(err){
+                    destroyeks = false 
+                    CurrentBuild.result = 'UNSTABLE'
+                }
+                if(destroyeks){
+
+                    sh """
+                        cd Terraform_eks
+                        terraform destroy --var-file="./config/terraform.tfvars"  --auto-approve
+                        cd ..
+                    
+                    """
+                }
+            }
+        }
 
     }
 }
