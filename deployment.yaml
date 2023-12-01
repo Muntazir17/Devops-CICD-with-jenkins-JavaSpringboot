@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
       - name: myspringbootapp
-        image: docker image push mrace17/mydemoapplication:latest
+        image: mrace17/mydemoapplication:latest
+        # jenkins job name  mydemoapplication
         imagePullPolicy: Always
         resources:
           limits:

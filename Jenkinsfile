@@ -12,10 +12,12 @@ pipeline{
     }
     stages{
 
+// ==================================== CI PART ======================================
+
 
         stage('Git checkout'){
             steps{
-                git branch: 'main', url: 'https://github.com/Muntazir17/Devops-proj2.git'
+                git branch: 'main', url: 'https://github.com/Muntazir17/Devops-project-JavaSpringboot.git'
             }
         }
 
