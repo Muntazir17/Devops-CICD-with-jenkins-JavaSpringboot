@@ -1,1 +1,1 @@
-# Devops-proj2
+# Devops Project CI/CD pipeline for JAVA application
